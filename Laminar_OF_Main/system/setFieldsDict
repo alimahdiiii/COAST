@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultFieldValues
+(
+    volScalarFieldValue alpha.water 0
+);
+
+regions
+(
+    // 1) Fill water (seaward)
+    boxToCell
+    {
+        box (-6.209835 0.000000 -0.551000) (0.350000 1.000000 0.000000);
+        fieldValues
+        (
+            volScalarFieldValue alpha.water 1
+        );
+    }
+
+    // 2) Drain container/landward part (keep it dry)
+    boxToCell
+    {
+        box (0.370000 0.000000 -0.551000) (0.770000 1.000000 0.000000);
+        fieldValues
+        (
+            volScalarFieldValue alpha.water 0
+        );
+    }
+);
+
+// ************************************************************************* //

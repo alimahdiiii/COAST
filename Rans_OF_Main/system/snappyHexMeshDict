@@ -1,0 +1,152 @@
+/*---------------------------------------------------------------------------*\\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2206                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    arch        "LSB;label=32;scalar=64";
+    class       dictionary;
+    location    "system";
+    object      snappyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+castellatedMesh true;
+snap            true;
+addLayers       false;
+
+geometry
+{
+    case_914-197.stl
+    {
+        type triSurfaceMesh;
+        name coast;
+    }
+
+    interfaceBand
+    {
+        type searchableBox;
+        min (-6.209835 0.000000 -0.140000);
+        max (0.770000 1.000000 0.140000);
+    }
+
+    runupBand
+    {
+        type searchableBox;
+        min (0.000000 0.000000 -0.551000);
+        max (0.770000 1.000000 0.360000);
+    }
+};
+
+castellatedMeshControls
+{
+    maxLocalCells 100000;
+    maxGlobalCells 20000000;
+    minRefinementCells 0;
+    nCellsBetweenLevels 2;
+
+    features
+    (
+        {
+            file "case_914-197.eMesh";
+            level 0;
+        }
+    );
+
+    refinementSurfaces
+    {
+        coast
+        {
+            level (1 1);
+        }
+    }
+
+    resolveFeatureAngle 30;
+
+    refinementRegions
+    {
+        interfaceBand
+        {
+            mode inside;
+            levels ((0 2));
+        }
+
+        runupBand
+        {
+            mode inside;
+            levels ((0 2));
+        }
+    }
+
+    locationInMesh (-0.1 0.5 0);   
+    // locationInMesh (-2.719918 0.500000 -0.300800);
+    allowFreeStandingZoneFaces true;
+}
+
+snapControls
+{
+    nSmoothPatch 3;
+    tolerance 2.0;
+    nSolveIter 300;
+    nRelaxIter 5;
+
+    nFeatureSnapIter 10;
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+    multiRegionFeatureSnap true;
+}
+
+addLayersControls
+{
+    relativeSizes true;
+    layers { }
+
+    expansionRatio 1.0;
+    finalLayerThickness 0.3;
+    minThickness 0.25;
+    nGrow 0;
+
+    featureAngle 30;
+    nRelaxIter 5;
+
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals 3;
+    nSmoothThickness 10;
+
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+    minMedianAxisAngle 90;
+
+    nBufferCellsNoExtrude 0;
+    nLayerIter 50;
+    nRelaxedIter 20;
+}
+
+meshQualityControls
+{
+    #include "meshQualityDict"
+
+    relaxed
+    {
+        maxNonOrtho 90;
+    }
+
+    nSmoothScale 4;
+    errorReduction 0.75;
+}
+
+writeFlags
+(
+    scalarLevels
+    layerSets
+    layerFields
+);
+
+mergeTolerance 1e-6;
+
+// ************************************************************************* //

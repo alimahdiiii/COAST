@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Fast deletion of OpenFOAM case directories (handles hundreds of thousands of files).
+# Deletes processor* and postProcessing directories in parallel using find -delete,
+# which is the fastest method for large directory trees.
+#
+# Usage:
+#   rmcase <case_dir> [<case_dir2> ...]
+#
+# Examples:
+#   rmcase Case_A-3.2_a500,b0.8
+#   rmcase case_01 case_02 case_03
+
+set -euo pipefail
+
+if [ $# -eq 0 ]; then
+    echo "Usage: rmcase <case_dir> [<case_dir2> ...]"
+    exit 1
+fi
+
+delete_dir() {
+    # find -delete is faster than rm -rf (no sorting, direct unlink)
+    find "$1" -type f -delete 2>/dev/null
+    find "$1" -depth -type d -delete 2>/dev/null
+}
+
+for target in "$@"; do
+    target=$(realpath "$target" 2>/dev/null || echo "$target")
+
+    if [ ! -d "$target" ]; then
+        echo "WARNING: '$target' does not exist or is not a directory, skipping."
+        continue
+    fi
+
+    # Safety: refuse to delete if it doesn't look like an OpenFOAM case
+    if [ ! -d "$target/system" ] && [ ! -d "$target/constant" ] && [ ! -f "$target/job_Run.sh" ]; then
+        echo "WARNING: '$target' does not look like an OpenFOAM case (no system/, constant/, or job_Run.sh)."
+        read -rp "Delete anyway? [y/N] " confirm
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            echo "Skipped '$target'."
+            continue
+        fi
+    fi
+
+    echo "Deleting '$target' ..."
+
+    # Launch parallel deletion of the heaviest subdirectories (processor*, postProcessing, VTK)
+    pids=()
+    for subdir in "$target"/processor* "$target"/postProcessing "$target"/VTK; do
+        if [ -d "$subdir" ]; then
+            echo "  parallel: $(basename "$subdir")"
+            delete_dir "$subdir" &
+            pids+=($!)
+        fi
+    done
+
+    # While those run in background, delete remaining files/dirs (small, fast)
+    # Exclude the dirs already being deleted in parallel
+    find "$target" -maxdepth 1 -mindepth 1 \
+        ! -name 'processor*' ! -name 'postProcessing' ! -name 'VTK' \
+        -exec rm -rf {} + 2>/dev/null || true
+
+    # Wait for parallel deletions to finish
+    for pid in "${pids[@]+"${pids[@]}"}"; do
+        wait "$pid" 2>/dev/null || true
+    done
+
+    # Remove the now-empty case directory
+    rmdir "$target" 2>/dev/null || rm -rf "$target"
+    echo "Done: '$target' removed."
+done

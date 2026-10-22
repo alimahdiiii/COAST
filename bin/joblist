@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# joblist: monitor OpenFOAM jobs running in tmux sessions (clean, no ETA, no total cores)
+
+REPO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TMUX_BIN="$REPO_DIR/tools/tmux/bin/tmux"
+
+if [ ! -x "$TMUX_BIN" ]; then
+  if command -v tmux >/dev/null 2>&1; then
+    TMUX_BIN="$(command -v tmux)"
+  else
+    echo "[ERROR] tmux not found."
+    echo "Run: ./tools/install_tmux.sh"
+    exit 1
+  fi
+fi
+
+ROOT="${1:-.}"
+USER_NAME="$(whoami)"
+
+FMT="%-28s %-10s %-8s %-5s %-8s %-8s %-30s\n"
+
+# Header (removed ETA)
+printf "$FMT" "CASE" "Status" "RunTime" "Procs" "CPU%" "RAM(MB)" "PHASE"
+printf "$FMT" "---------------------------" "--------" "--------" "-----" "--------" "--------" "------------------------------"
+
+now_ts=$(date +%s)
+total_cores=$(nproc 2>/dev/null || echo 1)
+used_cores=0
+
+# Loop cases
+while IFS= read -r sock_file; do
+    case_dir=$(dirname "$sock_file")
+    case_dir=$(realpath "$case_dir")
+    case_name=$(basename "$case_dir")
+
+    socket_path=$(cat "$sock_file" 2>/dev/null)
+
+    # STATUS
+    if [ -f "$case_dir/TMUX_STATUS.txt" ]; then
+        status=$(tr -d '\n' < "$case_dir/TMUX_STATUS.txt")
+    else
+        status="UNKNOWN"
+    fi
+
+    # tmux alive?
+    if [ -n "$socket_path" ] && [ -S "$socket_path" ]; then
+        "$TMUX_BIN" -S "$socket_path" ls >/dev/null 2>&1
+        [ $? -eq 0 ] && alive=yes || alive=no
+    else
+        alive=no
+    fi
+
+    if [ "$alive" = "no" ] && [ "$status" = "RUNNING" ]; then
+        status="DEAD?"
+    fi
+
+    # elapsed
+    # --- RUNTIME: freeze when not RUNNING ---
+    runtime_str="--:--"
+    elapsed_sec=0
+
+    start_ts=""
+    stop_ts=""
+
+    # start time = tmux socket creation
+    if [ -n "$socket_path" ] && [ -e "$socket_path" ]; then
+        start_ts=$(stat -c %Y "$socket_path" 2>/dev/null || echo "")
+    fi
+
+    # stop time = mtime of TMUX_STATUS.txt when status last changed
+    if [ -f "$case_dir/TMUX_STATUS.txt" ]; then
+        stop_ts=$(stat -c %Y "$case_dir/TMUX_STATUS.txt" 2>/dev/null || echo "")
+    fi
+
+    if [ -n "$start_ts" ]; then
+        if [ "$status" = "RUNNING" ]; then
+            end_ts=$now_ts
+        else
+            # for FINISHED_0, KILLED, DEAD?, etc.
+            if [ -n "$stop_ts" ]; then
+                end_ts=$stop_ts
+            else
+                end_ts=$now_ts
+            fi
+        fi
+
+        elapsed_sec=$(( end_ts - start_ts ))
+        [ $elapsed_sec -lt 0 ] && elapsed_sec=0
+
+        h=$(( elapsed_sec / 3600 ))
+        m=$(( (elapsed_sec % 3600) / 60 ))
+        s=$(( elapsed_sec % 60 ))
+        runtime_str=$(printf "%02d:%02d:%02d" "$h" "$m" "$s")
+    fi
+
+
+    # phase + time
+    phase="?"
+    current_time=""
+    end_time=""
+
+    if [ -f "$case_dir/system/controlDict" ]; then
+        end_time=$(grep -E '^[[:space:]]*endTime[[:space:]]+' "$case_dir/system/controlDict" \
+                   | tail -n 1 | awk '{for(i=1;i<=NF;i++) if($i ~ /^[0-9.+-eE]+$/){print $i; exit}}')
+    fi
+
+    solver_log=""
+    solver_label=""
+    if [ -f "$case_dir/log.porousWaveFoam" ]; then
+        solver_log="$case_dir/log.porousWaveFoam"
+        solver_label="porousWaveFoam"
+    elif [ -f "$case_dir/log.waveFoam" ]; then
+        solver_log="$case_dir/log.waveFoam"
+        solver_label="waveFoam"
+    fi
+
+    if [ -n "$solver_log" ]; then
+        line=$(grep -E "^Time = " "$solver_log" 2>/dev/null | tail -n 1)   # not "ExecutionTime = ..."
+        if [ -n "$line" ]; then
+            current_time=$(echo "$line" | awk '{for(i=1;i<=NF;i++) if($i=="="){print $(i+1); exit}}')
+        fi
+
+        if [ -n "$current_time" ] && [ -n "$end_time" ]; then
+            phase=$(awk -v cur="$current_time" -v end="$end_time" -v lbl="$solver_label" \
+                'BEGIN{p=100*cur/end; if(p<0)p=0; if(p>100)p=100; printf("%s: t=%.2f/%.2f (%.0f%%)", lbl,cur,end,p)}')
+        elif [ -n "$current_time" ]; then
+            phase=$(awk -v cur="$current_time" -v lbl="$solver_label" 'BEGIN{printf("%s: t=%.2f",lbl,cur)}')
+        else
+            phase="$solver_label"
+        fi
+
+    elif [ -f "$case_dir/log.snappy" ]; then
+        phase="snappyHexMesh"
+    fi
+
+    # CPU/RAM/PROCS
+    cpu_sum=0
+    mem_sum_kb=0
+    procs_case=0
+
+    for pid in $(ps -u "$USER_NAME" -o pid= 2>/dev/null); do
+        [ -d "/proc/$pid" ] || continue
+        cwd=$(readlink -f "/proc/$pid/cwd" 2>/dev/null || echo "")
+        case "$cwd" in
+            "$case_dir"|"$case_dir"/*)
+                # use 'comm' (executable name) instead of full cmdline
+                read -r pcpu rss comm <<< "$(ps -p "$pid" -o %cpu=,rss=,comm= 2>/dev/null)"
+                [ -z "$pcpu" ] && continue
+
+                cpu_sum=$(awk -v a="$cpu_sum" -v b="$pcpu" 'BEGIN{print a+b}')
+                mem_sum_kb=$((mem_sum_kb + rss))
+
+                # count only real solver/mesher ranks, not mpirun or others
+                if [ "$comm" = "waveFoam" ] || [ "$comm" = "porousWaveFoam" ] || [ "$comm" = "snappyHexMesh" ]; then
+                    procs_case=$((procs_case + 1))
+                fi
+                ;;
+        esac
+    done
+
+    cpu_str="--"
+    mem_str="--"
+    if [ "$cpu_sum" != "0" ]; then
+        cpu_str=$(awk -v c="$cpu_sum" 'BEGIN{printf "%.1f", c}')
+        [ $procs_case -eq 0 ] && procs_case=1
+    fi
+    if [ "$mem_sum_kb" -gt 0 ]; then
+        mem_str=$(awk -v k="$mem_sum_kb" 'BEGIN{printf "%.1f", k/1024}')
+    fi
+
+    used_cores=$(( used_cores + procs_case ))
+
+    printf "$FMT" "$case_name" "$status" "$runtime_str" "$procs_case" "$cpu_str" "$mem_str" "$phase"
+
+done < <(find "$ROOT" -maxdepth 3 -type f -name TMUX_SOCKET.txt | sort)
+
+free_cores=$(( total_cores - used_cores ))
+[ $free_cores -lt 0 ] && free_cores=0
+
+echo
+echo "cores used: $used_cores"
+echo "cores free: $free_cores"

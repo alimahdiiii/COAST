@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.1                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      waveProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+porosityModel jensenJacobsenChristensen2014;
+seaLevel            0;
+seaLevelAsReference true;
+relaxationNames     (inlet);
+initializationName  inlet;
+
+inletCoeffs
+{
+    waveType irregular;
+    spectrum JONSWAP;
+    
+    frequencyAxis
+    {
+        type           angularFrequency;
+        discretisation equidistantFrequencyAxis;
+    }
+    
+
+    Hs              0.12;
+    Tp              1.4;
+    gamma           3.3;
+    N               100;
+    Tsoft           2.0;
+    depth           0.55;
+    direction       (1 0 0);
+    phi             0;
+
+
+    phaseMethod     randomPhase;
+    seedForRandomPhase   1234;
+    
+    
+    relaxationZone
+    {
+        relaxationScheme Spatial;
+        relaxationShape  Rectangular;
+        beachType        Empty;
+
+        relaxType   INLET;
+        startX      (-6.209835 0.0 -0.551000);
+        endX        (-3.149668 0.0 0.700000);
+        orientation (1.0 0.0 0.0);
+    }
+}
+
+
+// ************************************************************************* //
+

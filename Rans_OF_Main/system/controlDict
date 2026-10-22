@@ -1,0 +1,137 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     waveFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         100.0;
+
+deltaT          0.01;
+
+writeControl    adjustableRunTime;
+writeInterval   0.1;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+writePrecision  6;
+writeCompression off;
+
+timeFormat      general;
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+maxCo           0.8;
+maxAlphaCo      0.8;
+maxDeltaT       0.2;
+
+
+functions
+{
+    overtopping
+    {
+        type    overtopping;
+        libs    ("libwaves2FoamSampling.so");
+
+        phiName     phi;      // optional, default is phi
+        rhoPhiName  rhoPhi;   // THIS is the important one
+
+        writeControl  timeStep;
+        writeInterval 1;
+    }
+ forceImpact
+  {
+    type            forces;
+    libs            ("libforces.so");
+
+    patches         (x04);
+
+    rhoInf          1000;      // water density reference
+    log             true;
+
+    CofR            (0 0 0);   // not critical for force only
+
+    writeControl    runTime;
+    writeInterval   0.1;
+  }
+    
+    freeSurface
+    {
+        type            surfaces;
+        libs            ("libsampling.so");
+        fields          (alpha.water);
+        surfaceFormat   raw;          
+
+        surfaces
+        (
+            fs
+            {
+                type        isoSurface;
+                isoField    alpha.water;
+                isoValue    0.5;
+                interpolate true;    
+
+            }
+        );
+
+        writeControl runTime;
+        writeInterval 0.1;             
+    }
+    
+    
+ line
+    {
+        type                  sets;
+        libs                  ("libsampling.so");
+        enabled               true;
+        writeControl          runTime;
+        writeInterval         0.1;
+
+        interpolationScheme   cellPoint;
+        setFormat             raw;
+        fixedLocations        false;
+
+        fields
+          (
+             U
+             p_rgh
+             rho
+             alpha.water
+          );
+        sets
+        {
+            line1
+            {
+                type    uniform;
+                axis    distance;
+                start   (100 0.05 1);
+                end     (100 0.05 4.2);
+                nPoints 300;
+            }
+
+        }
+    }
+
+
+// ************************************************************************* //
+

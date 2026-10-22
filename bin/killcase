@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Kill one OpenFOAM/tmux case by (partial) name
+
+if [ $# -lt 1 ]; then
+    echo "Usage: killcase <case_name_part>" >&2
+    exit 1
+fi
+
+NAME_PART="$1"
+REPO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TMUX_BIN="$REPO_DIR/tools/tmux/bin/tmux"
+
+if [ ! -x "$TMUX_BIN" ]; then
+  if command -v tmux >/dev/null 2>&1; then
+    TMUX_BIN="$(command -v tmux)"
+  else
+    echo "[ERROR] tmux not found."
+    echo "Run: ./tools/install_tmux.sh"
+    exit 1
+  fi
+fi
+
+
+# Find matching cases (directories containing TMUX_SOCKET.txt)
+matches=($(find . -maxdepth 3 -type f -name TMUX_SOCKET.txt -printf '%h\n' | grep -i "$NAME_PART"))
+
+if [ ${#matches[@]} -eq 0 ]; then
+    echo "No case found matching '$NAME_PART'" >&2
+    exit 1
+elif [ ${#matches[@]} -gt 1 ]; then
+    echo "Multiple cases match '$NAME_PART':" >&2
+    for d in "${matches[@]}"; do
+        echo "  $d"
+    done
+    echo "Please be more specific." >&2
+    exit 1
+fi
+
+case_dir="${matches[0]}"
+case_name="$(basename "$case_dir")"
+
+sock_file="$case_dir/TMUX_SOCKET.txt"
+if [ ! -f "$sock_file" ]; then
+    echo "No TMUX_SOCKET.txt in $case_dir" >&2
+    exit 1
+fi
+
+socket_path="$(cat "$sock_file")"
+
+echo "Killing case: $case_name"
+echo "  socket: $socket_path"
+
+if [ -S "$socket_path" ]; then
+    "$TMUX_BIN" -S "$socket_path" kill-server 2>/dev/null || true
+else
+    echo "Warning: tmux socket not found or already dead." >&2
+fi
+
+# Mark as killed
+echo "KILLED" > "$case_dir/TMUX_STATUS.txt"
+
+echo "✅ $case_name marked as KILLED"

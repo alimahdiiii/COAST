@@ -1,0 +1,113 @@
+COAST — Coastal Overtopping Analysis and Simulation Toolkit
+================================================================================
+
+Copyright (c) 2026 Ali Mahdi
+CORIA, UMR 6614 CNRS, Université de Rouen Normandie
+Contact: ali.mahdi@coria.fr
+
+Licensed under the CeCILL Free Software License Agreement, version 2.1
+(dated 2013-06-21). The full licence text is in the file LICENSE at the root of
+this repository.
+
+The CeCILL licence was written by CEA, CNRS and Inria under French law. It
+exists in French and English, and the two versions are equally authoritative
+(Article 11.5). The English text is the one distributed here. The French text
+is published at:
+
+    https://cecill.info/licences/Licence_CeCILL_V2.1-fr.txt
+
+SPDX-License-Identifier: CECILL-2.1
+
+
+--------------------------------------------------------------------------------
+IF YOU REDISTRIBUTE OR MODIFY COAST
+--------------------------------------------------------------------------------
+
+CeCILL v2.1 is a copyleft licence, compatible with the GNU GPL, the GNU Affero
+GPL and the EUPL (Article 5.3.4). You may use, study, modify and redistribute
+this software. In summary:
+
+  1. any copy you distribute, modified or not, must be accompanied by a copy of
+     the licence and by a notice on the limitation of warranty and liability of
+     Articles 8 and 9 (Articles 5.3.1 and 5.3.2);
+  2. a modified version you distribute is subject to all the provisions of the
+     licence: it must be distributed under CeCILL v2.1 (Article 5.3.2), or under
+     the GNU GPL, GNU Affero GPL or EUPL in the cases of Article 5.3.4;
+  3. if you distribute only object code, you must give effective access to the
+     full source code for at least three years (Articles 5.3.1 and 5.3.2);
+  4. you must not remove or modify the intellectual property notices, and you
+     must reproduce them in every copy (Article 6.4);
+  5. your contributions must carry an explicit notice that you are their author,
+     with the date of their creation (Article 5.2).
+
+A module that runs in a separate address space and only calls COAST (External
+Module, Article 5.3.3) may be distributed under another licence.
+
+The articles of LICENSE are what bind; the list above is only a summary.
+
+If COAST contributes to published work, please also cite:
+
+    Mahdi, A., Réveillon, J., Turki, I., Duret, B., and Demoulin, F.-X. (2026).
+    COAST: Coastal overtopping analysis and simulation toolkit.
+    CORIA, UMR 6614 CNRS, Université de Rouen Normandie.
+
+
+--------------------------------------------------------------------------------
+AUTHOR'S ADDITIONAL NOTICE
+--------------------------------------------------------------------------------
+
+The following is a notice from the author. It adds nothing to the licence and
+takes nothing away from it: the CeCILL text in LICENSE may not be altered,
+and no provision may be added to or removed from it. Articles 8 (LIABILITY) and
+9 (WARRANTY) of the licence govern. This notice only draws attention to what
+those articles mean in the specific context of this software.
+
+COAST is research software. It automates the setup, execution and analysis of
+Computational Fluid Dynamics simulations of wave overtopping, and is provided
+for research and educational purposes.
+
+NO RESPONSIBILITY FOR RESULTS. The author gives no assurance as to the
+accuracy, reliability, completeness or fitness for any purpose of any output
+produced by this software, including generated geometries, meshes, OpenFOAM
+case files, simulation results, mean overtopping discharges, wave statistics,
+spectra, reflection coefficients, energy fluxes, forces, reports, figures, and
+any derived quantity. Numerical results depend on the mesh, the numerical
+schemes, the turbulence closure, the porous-medium calibration, the wave
+generation and absorption settings, the record length, and the choices made by
+the user. Article 9.1 of the licence places the responsibility for verifying
+the suitability of the software, its good working order, and that it causes no
+damage to persons or property, on the user. All results must be independently
+verified before any use. The manual (docs/main.pdf) gives a recommended
+verification sequence.
+
+NOT FOR DESIGN. This software is not a design tool and must not be used as the
+sole or primary basis for the design, assessment, certification or operation of
+any coastal structure, flood defence or other engineering work, nor for any
+decision affecting public safety, property or the environment. Any such use is
+at the user's own risk and remains the responsibility of the user and of the
+qualified engineer signing off on the work.
+
+SOFTWARE BEHAVIOUR. COAST creates, modifies and deletes files and directories,
+launches and terminates processes and terminal-multiplexer sessions, and
+consumes CPU, memory, disk and cluster resources. The user is responsible for
+reviewing the code, for backing up their data, and for operating the software
+within the rules of their computing environment.
+
+
+--------------------------------------------------------------------------------
+THIRD-PARTY SOFTWARE AND DATA
+--------------------------------------------------------------------------------
+
+COAST orchestrates independent third-party software that it neither includes
+nor licenses to the user, in particular OpenFOAM, the waves2Foam library, and
+the Python scientific stack. Each is governed by its own licence and its own
+warranty terms, and must be obtained and used accordingly.
+
+COAST is not approved or endorsed by OpenCFD Ltd (ESI Group), producer of the
+OpenFOAM software and owner of the OPENFOAM trademark, nor by any other third
+party.
+
+The EurOtop experimental database and the EurOtop manual are the property of
+their respective owners and are subject to their own terms of use. They are
+referenced for comparison purposes only and are not licensed under the terms
+above.
