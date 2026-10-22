@@ -3,6 +3,8 @@
 # --------------------------------------------------
 C-*/
 Case_*/
+case_*/
+case-*/
 TRIAL_*/
 ca*/
 
@@ -14,73 +16,39 @@ postProcessing/
 constant/polyMesh/
 
 # --------------------------------------------------
-# Python cache
+# Python
 # --------------------------------------------------
 __pycache__/
 *.pyc
-plot*/
-# --------------------------------------------------
-# Jupyter
-# --------------------------------------------------
 .ipynb_checkpoints/
+*.ipynb
 
 # --------------------------------------------------
-# Local tmux build
+# Generated figures, reports and scratch output
 # --------------------------------------------------
-tools/tmux/
-
-STL_Geos/
-
-.claude/
-
-
-*.bak
-run.txt
-Database_Eurotop_v5.xlsx
-
-
-case_A-*/
-case_B-*/
-case_D-*/
-comparision/
-comparision_case_*/
-paper_tables_figures/
+plot*/
 *.png
 !workflow.png
-run_coast.txt
+!COAST_logo.png
+*.bak
+run*.txt
+
+# --------------------------------------------------
+# Input data and result tables, which are not redistributed
+# --------------------------------------------------
+*.xlsx
+*.csv
+
+# --------------------------------------------------
+# Local tooling and settings
+# --------------------------------------------------
+tools/tmux/
 .streamlit/
-
-case_*/
-case-*/
-
-Laminar_OF_Main/OV_Test.py
-run_batch_from_eurotop.py
-selected_eurotop_cases_parameters.csv
-
-Q_results/
-CLAUDE.md
-COAST_article.md
-OF_CLASH.ipynb
 
 # --------------------------------------------------
 # Documentation
 # --------------------------------------------------
-# Only the manual PDF is published; its LaTeX source, figures and build
-# files stay local.
+# Only the compiled manual is published; its LaTeX source, figures and
+# build files stay local.
 /docs/*
-!/docs/Documentation Manual.pdf
-
-
-
-
-
-/Article/
-
-# --------------------------------------------------
-# Catch-all
-# --------------------------------------------------
-# .gitignore only governs UNTRACKED files, so everything already in the
-# repository stays tracked and its changes commit and push as usual.
-# This rule only stops NEW files from being picked up by accident.
-# To add a genuinely new file on purpose:  git add -f <path>
-*
+!/docs/*.pdf

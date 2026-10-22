@@ -9,9 +9,8 @@
   <a href="#what-is-coast">About</a>
   <a href="#features">Features</a>
   <a href="#quick-start">Quick Start</a>
-  <a href="#workflow">Workflow</a>
-  <a href="#post-processing-pipeline">Post-Processing</a>
-  <a href="#documentation">Docs</a>
+  <a href="#full-workflow">Workflow</a>
+  <a href="#post-processing-10-tabs">Post-Processing</a>
   <a href="#repository-structure">Structure</a>
   <a href="#license">License</a>
   <a href="#authors">Authors</a>
@@ -27,7 +26,7 @@
 > COAST must **not** be used as the sole or primary basis for the design, assessment,
 > or certification of any coastal structure or flood defence, nor for any decision
 > affecting public safety, property, or the environment.
-> See [LICENSE](LICENSE), [NOTICE](NOTICE) and the [manual](docs/Documentation%20Manual.pdf) for the full terms.
+> See [LICENSE](LICENSE) and [NOTICE](NOTICE) for the full terms.
 
 ---
 
@@ -180,8 +179,7 @@ COAST/
 ├── install.sh                    # Setup script (tmux + PATH)
 ├── requirements.txt              # Python dependencies
 ├── LICENSE                       # CeCILL Free Software License Agreement, version 2.1
-├── NOTICE                        # Copyright, licence summary, author's notice
-└── docs/                         # User and technical manual (Documentation Manual.pdf)
+└── NOTICE                        # Copyright, licence summary, author's notice
 ```
 
 ---
