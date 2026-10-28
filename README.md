@@ -12,6 +12,7 @@
   <a href="#full-workflow">Workflow</a>
   <a href="#post-processing-10-tabs">Post-Processing</a>
   <a href="#repository-structure">Structure</a>
+  <a href="#citation">Citation</a>
   <a href="#license">License</a>
   <a href="#authors">Authors</a>
 </p>
@@ -181,6 +182,34 @@ COAST/
 ├── LICENSE                       # CeCILL Free Software License Agreement, version 2.1
 └── NOTICE                        # Copyright, licence summary, author's notice
 ```
+
+---
+
+## Citation
+
+If COAST contributes to published work, please cite the article that describes it:
+
+> Mahdi, A., Turki, I., Réveillon, J., Duret, B. and Demoulin, F.-X. (2026).
+> COAST: An open-source framework for automated wave overtopping analysis and
+> simulation of coastal structures. *Results in Engineering*, **32**, 113720.
+> [doi:10.1016/j.rineng.2026.113720](https://doi.org/10.1016/j.rineng.2026.113720)
+
+```bibtex
+@article{Mahdi2026COAST,
+  title   = {COAST: An open-source framework for automated wave overtopping
+             analysis and simulation of coastal structures},
+  author  = {Mahdi, Ali and Turki, Imen and R{\'e}veillon, Julien and Duret, Benjamin
+             and Demoulin, Fran{\c c}ois-Xavier},
+  journal = {Results in Engineering},
+  volume  = {32},
+  pages   = {113720},
+  year    = {2026},
+  doi     = {10.1016/j.rineng.2026.113720}
+}
+```
+
+The repository also carries a [`CITATION.cff`](CITATION.cff) file, so GitHub offers
+the same reference through its *Cite this repository* button.
 
 ---
 

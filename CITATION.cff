@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+message: "If COAST contributes to published work, please cite the article below."
+title: "COAST: Coastal Overtopping Analysis and Simulation Toolkit"
+abstract: >-
+  A Streamlit application that automates the whole OpenFOAM pipeline for wave
+  overtopping simulations on coastal structures, from parametric geometry and
+  mesh generation through to event-by-event post-processing.
+type: software
+version: "1.0"
+license: CECILL-2.1
+repository-code: "https://github.com/alimahdiiii/COAST"
+keywords:
+  - OpenFOAM
+  - wave overtopping
+  - coastal engineering
+  - computational fluid dynamics
+  - free-surface flow
+authors:
+  - family-names: Mahdi
+    given-names: Ali
+    email: ali.mahdi@coria.fr
+    orcid: "https://orcid.org/0009-0005-0208-5479"
+    affiliation: "CORIA, UMR 6614 CNRS, Université de Rouen Normandie"
+preferred-citation:
+  type: article
+  title: "COAST: An open-source framework for automated wave overtopping analysis and simulation of coastal structures"
+  journal: "Results in Engineering"
+  volume: 32
+  start: 113720
+  year: 2026
+  month: 12
+  issn: "2590-1230"
+  doi: "10.1016/j.rineng.2026.113720"
+  authors:
+    - family-names: Mahdi
+      given-names: Ali
+      orcid: "https://orcid.org/0009-0005-0208-5479"
+      affiliation: "CORIA, UMR 6614 CNRS, Université de Rouen Normandie"
+    - family-names: Turki
+      given-names: Imen
+    - family-names: Réveillon
+      given-names: Julien
+    - family-names: Duret
+      given-names: Benjamin
+    - family-names: Demoulin
+      given-names: François-Xavier
